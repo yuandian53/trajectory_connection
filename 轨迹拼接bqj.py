@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from fastdtw import fastdtw
 import matplotlib.pyplot as plt
 import os
 import re
@@ -126,14 +127,18 @@ for key, value in excel_dict.items():
 
                 # 取出重叠区域(第2种方法)
                 # 计算与给定值最接近的一行的索引
-                leftNearestIndex = (group['x'] - leftPoint).abs().idxmin()
-                leftOverlapArea= group.loc[leftNearestIndex:]
-                rightNearestIndex = (track2['x'] - rightPoint).abs().idxmin()
-                rightOverlapArea = track2.loc[:rightNearestIndex]
-                plot(leftOverlapArea,rightOverlapArea)
+                # leftNearestIndex = (group['x'] - leftPoint).abs().idxmin()
+                # leftOverlapArea= group.loc[leftNearestIndex:]
+                # rightNearestIndex = (track2['x'] - rightPoint).abs().idxmin()
+                # rightOverlapArea = track2.loc[:rightNearestIndex]
+                # plot(leftOverlapArea,rightOverlapArea)
                 
-
-
+                #第三种算法：dtw寻找最佳匹配
+                trajectory_left = np.array(group[['x', 'y']].values.tolist())
+                trajectory_right = np.array(track2[['x', 'y']].values.tolist())
+                distance, path = fastdtw(trajectory_left, trajectory_right)
+                print("DTW距离:", distance)
+                print("最佳匹配路径:", path)
 
 
     print(0)
