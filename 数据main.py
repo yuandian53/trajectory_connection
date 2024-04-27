@@ -28,7 +28,7 @@ for filename in os.listdir(folder_path):
         # 将数据添加到字典中，以文件名（不含扩展名）作为键
         excel_dict[os.path.splitext(filename)[0]] = excel_data
 # 现在excel_dict包含了所有的Excel数据，键是文件名，值是对应的DataFrame
-
+# ------------------------------------ aa ------------------------------------ #
 # ------------------------------- 遍历所有的配对区域，5对 ------------------------------- #
 for key, value in excel_dict.items():
     left_file_id = None
@@ -42,6 +42,7 @@ for key, value in excel_dict.items():
     df_right_dict = read_left_file_id_csv_to_dataframe(right_file_id,notReservedColumn)
 
     # 遍历left轨迹文件
+    
     output_df=pd.DataFrame()
     for k, v in df_left_dict.items():
         matchs = value[value['p1_file'] == k]
@@ -61,7 +62,6 @@ for key, value in excel_dict.items():
                 print(group['direction'].unique(), track2['direction'].unique())
                 track1=group
                 direction=track2['direction'].iloc[0]
-
                 # ---------------------------------- 得到重叠区域 ---------------------------------- #
                 #left_region的x值小于right_region
                 leftPoint=track2["x"].min()
@@ -79,8 +79,13 @@ for key, value in excel_dict.items():
                 rightIndex2 = track2["x"].idxmin()
                 index_max= rightIndex2 if rightIndex2>=rightNearestIndex1 else rightNearestIndex1
                 index_min= rightIndex2 if rightIndex2<rightNearestIndex1 else rightNearestIndex1
-                rightOverlapArea = track2.loc[:rightNearestIndex1]
+                rightOverlapArea = track2.loc[index_min:index_max]
                 rightRemain = track2.loc[~track2.index.isin(rightOverlapArea.index)]
+
+                if len(leftRemain)==0 or len(rightRemain)==0:
+                    output_df=pd.concat([output_df,track1])
+                    print("there is a covered trajectory")
+                    continue
 
                 trajectory_left = np.array(leftOverlapArea[['x', 'y']].values.tolist()) 
                 trajectory_right = np.array(rightOverlapArea[['x', 'y']].values.tolist())
@@ -130,5 +135,13 @@ for key, value in excel_dict.items():
                     plt.close()
                 output_df=pd.concat([output_df,trajectory_smooth])
     output_df.to_csv(f"output\{left_file_id}-{right_file_id}.csv")
+                
+                # #第三种算法：dtw寻找最佳匹配
+                # trajectory_left = np.array(group[['x', 'y']].values.tolist())
+                # trajectory_right = np.array(track2[['x', 'y']].values.tolist())
+                # distance, path = fastdtw(trajectory_left, trajectory_right)
+                # print("DTW距离:", distance)
+                # print("最佳匹配路径:", path)
 
     print(0)
+    

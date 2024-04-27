@@ -99,7 +99,7 @@ def smooth_function(df,col_name,smooth_part):
         # 找到缺失数据的索引
         missing_indices = np.isnan(df[col])
         # 创建插值函数，使用非缺失部分的数据进行插值
-        f = interp1d(time[~missing_indices], x[~missing_indices], kind='cubic')
+        f = interp1d(time[~missing_indices], x[~missing_indices], kind='cubic',bounds_error=False)
         # 将缺失部分的值替换回原始数组中
         x[missing_indices] = f(time[missing_indices])
         df[col]=x
